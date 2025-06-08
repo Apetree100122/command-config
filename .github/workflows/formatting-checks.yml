@@ -1,24 +1,46 @@
-name: Formatting Check
+name: CI
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  spellcheck:
-    name: Check for formatting errors
+  lint:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Run formatting checks
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Run formatting and lint checks
         run: |
           bun install
           bun eslint --fix-dry-run --ignore-pattern dist/
           bun format:cspell
           bun prettier --check .
+
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Run Jest tests
+        run: |
+          bun install --frozen-lockfile
+          bun run test
+      - name: Add Jest Report to Summary
+        if: always()
+        run: echo "$(cat test-dashboard.md)" >> $GITHUB_STEP_SUMMARY
+
+  conventional-commits:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ubiquity/action-conventional-commits@master
