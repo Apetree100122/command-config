@@ -13,7 +13,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - uses: actions/checkout@v4
-
       - name: Get Deleted Branch Name
         id: get_branch
         run: |
